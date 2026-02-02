@@ -1,0 +1,23 @@
+module vid_pipe::revoker {
+    use vid_pipe::cache::{Self, CachedProof};
+    use aptos_std::table;
+
+    struct RevocationList has key {
+        revoked: Table<address, bool>,
+    }
+
+    public entry fun revoke_proof(admin: &signer, did: address) acquires RevocationList, CacheStore {
+        if (!exists<RevocationList>(@vid_pipe)) {
+            move_to(admin, RevocationList { revoked: table::new() });
+        };
+        let rev_list = borrow_global_mut<RevocationList>(@vid_pipe);
+        table::add(&mut rev_list.revoked, did, true);
+
+        // Update cache proof
+        let store = borrow_global_mut<CacheStore>(@vid_pipe);
+        if (table::contains(&store.proofs, did)) {
+            let proof = table::borrow_mut(&mut store.proofs, did);
+            // Set invalid flag or timestamp expire
+        };
+    }
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VID-Pipe | 0G Decentralized Verification</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #3b82f6; /* Blue */
+      --success: #10b981; /* Green */
+      --warning: #f59e0b; /* Amber */
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% 0%, #1e3a8a 0%, var(--bg-dark) 60%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-main);
+    }
+
+    /* Glassmorphism Card */
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      width: 480px;
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Header Styling */
+    h1 {
+      margin: 0;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-main);
+      font-size: 28px;
+      letter-spacing: -1px;
+    }
+    
+    .badge-0g {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      margin-bottom: 32px;
+    }
+
+    /* Inputs */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Action Area */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Demo Shortcuts */
+    .demo-chips {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+    
+    .chip {
+      font-size: 11px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .chip:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-color: var(--text-muted);
+    }
+
+    /* Results Dashboard */
+    .result-panel {
+      margin-top: 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none; /* Hidden by default */
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .metric-row {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .metric {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .status-msg {
+      padding: 16px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    /* Dynamic Colors */
+    .text-green { color: var(--success); }
+    .text-blue { color: var(--primary); }
+    .text-yellow { color: var(--warning); }
+    .text-red { color: #ef4444; }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>VID<span class="badge-0g">-Pipe</span></h1>
+    <div class="subtitle">
+      Zero-Knowledge Identity on 0G Storage
+    </div>
+
+    <div class="demo-chips">
+      <div class="chip" onclick="fillForm('EthGlobal', 'Hacker_Pass_2026')">
+        🎟️ Event Access
+      </div>
+      <div class="chip" onclick="fillForm('Gov India', 'DL-99382')">🚗 Demo: Driver</div>
+    </div>
+
+    <div class="input-group">
+      <label>Identity Issuer</label>
+      <input id="issuer" placeholder="e.g. University, Government, DAO" autocomplete="off" />
+    </div>
+
+    <div class="input-group">
+      <label>Credential ID / Claim</label>
+      <input id="credential" placeholder="e.g. Membership ID" autocomplete="off" />
+    </div>
+
+    <button class="btn-primary" onclick="verifyIdentity()" id="verifyBtn">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnText">Verify Identity</span>
+    </button>
+
+    <div id="resultPanel" class="result-panel">
+      
+      <div id="statusMsg" class="status-msg">
+        <span id="statusIcon">✅</span>
+        <span id="statusText">Identity Verified</span>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">Latency</div>
+          <div class="metric-value" id="latencyVal">-- ms</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Source</div>
+          <div class="metric-value" id="sourceVal">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Trust Score</div>
+          <div class="metric-value text-green">99/100</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- UX Helper: Fill Form ---
+    function fillForm(iss, cred) {
+      document.getElementById('issuer').value = iss;
+      document.getElementById('credential').value = cred;
+      // Clear previous results
+      document.getElementById('resultPanel').style.display = 'none';
+    }
+
+    // --- Main Logic ---
+    async function verifyIdentity() {
+      const issuer = document.getElementById("issuer").value;
+      const credential = document.getElementById("credential").value;
+      const resultPanel = document.getElementById("resultPanel");
+      const btn = document.getElementById("verifyBtn");
+      const spinner = document.getElementById("spinner");
+      const btnText = document.getElementById("btnText");
+
+      // UI Reset
+      resultPanel.style.display = "none";
+      
+      if (!issuer || !credential) {
+        alert("Please enter both fields.");
+        return;
+      }
+
+      // 1. Start Loading State
+      btn.disabled = true;
+      spinner.style.display = "block";
+      btnText.textContent = "Verifying on 0G Network...";
+      
+      // 2. Start Timer (Metrics)
+      const startTime = performance.now();
+
+      try {
+        // 3. API Call
+        const response = await fetch("/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ issuer, credential })
+        });
+
+        const data = await response.json();
+
+        // 4. Stop Timer
+        const endTime = performance.now();
+        const duration = (endTime - startTime).toFixed(0);
+
+        // 5. Render Results
+        renderResults(data, duration);
+
+      } catch (e) {
+        console.error(e);
+        alert("Connection Error to VID-Pipe Node");
+      } finally {
+        // 6. Reset Button
+        btn.disabled = false;
+        spinner.style.display = "none";
+        btnText.textContent = "Verify Identity";
+      }
+    }
+
+    function renderResults(data, duration) {
+      const panel = document.getElementById("resultPanel");
+      const statusText = document.getElementById("statusText");
+      const statusIcon = document.getElementById("statusIcon");
+      const statusMsg = document.getElementById("statusMsg");
+      
+      const latencyVal = document.getElementById("latencyVal");
+      const sourceVal = document.getElementById("sourceVal");
+
+      // Reveal Panel
+      panel.style.display = "block";
+
+      // 1. Latency Metric
+      latencyVal.textContent = `${duration}ms`;
+      // Color logic: Fast (Cache) = Green, Slow (Compute) = Yellow
+      latencyVal.className = "metric-value " + (duration < 100 ? "text-green" : "text-yellow");
+
+      // 2. Source Metric
+      // If the backend sends "source", use it. Otherwise guess based on time.
+      let source = data.source || (duration < 100 ? "0G_CACHE" : "COMPUTE");
+      sourceVal.textContent = source;
+      sourceVal.className = "metric-value " + (source.includes("CACHE") ? "text-blue" : "text-yellow");
+
+      // 3. Status Bar
+      if (data.verified) {
+        statusMsg.style.background = "rgba(16, 185, 129, 0.1)";
+        statusMsg.style.color = "#10b981"; // Green
+        statusIcon.textContent = "🛡️";
+        statusText.innerHTML = `<b>Verified</b> · ${data.message || "Credential Valid"}`;
+      } else {
+        statusMsg.style.background = "rgba(239, 68, 68, 0.1)";
+        statusMsg.style.color = "#ef4444"; // Red
+        statusIcon.textContent = "🚫";
+        statusText.innerHTML = `<b>Failed</b> · ${data.message || "Invalid Credential"}`;
+      }
+    }
+  </script>
+
+</body>
+</html>
